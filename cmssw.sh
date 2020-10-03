@@ -6,13 +6,13 @@ export SCRAM_ARCH=slc7_amd64_gcc820
 source $VO_CMS_SW_DIR/cmsset_default.sh
 
 # Reference release
-REFERENCE_RELEASE=CMSSW_11_2_0_pre3
+REFERENCE_RELEASE=CMSSW_11_2_0_pre7
 
 # Development branch and latest release
 #DEVELOPMENT_BRANCH=master
-#DEVELOPMENT_RELEASE=CMSSW_11_2_0_pre3
+#DEVELOPMENT_RELEASE=CMSSW_11_2_0_pre7
 DEVELOPMENT_BRANCH=CMSSW_11_2_X_Patatrack
-DEVELOPMENT_RELEASE=CMSSW_11_2_0_pre3_Patatrack
+DEVELOPMENT_RELEASE=CMSSW_11_2_0_pre7_Patatrack
 
 # Number of threads and streams used in each job
 THREADS=8
@@ -33,8 +33,8 @@ VALIDATE="$PIXEL_VALIDATION $ECAL_VALIDATION $HCAL_VALIDATION"
 
 # Enable profiling for selected workflows
 PIXEL_PROFILING="11634.502 136.885502"
-PIXEL_PROFILING_FILE=RecoPixelVertexing/Configuration/customizePixelTracksForProfiling
-PIXEL_PROFILING_FUNC=customizePixelTracksForProfilingGPUOnly
+PIXEL_PROFILING_FILE=RecoTracker/Configuration/customizePixelOnlyForProfiling
+PIXEL_PROFILING_FUNC=customizePixelOnlyForProfilingGPUOnly
 ECAL_PROFILING="11634.512 136.885512"
 ECAL_PROFILING_FILE=RecoLocalCalo/Configuration/customizeEcalOnlyForProfiling
 ECAL_PROFILING_FUNC=customizeEcalOnlyForProfilingGPUOnly
