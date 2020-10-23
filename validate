@@ -67,10 +67,24 @@ upload_report $ISSUE_NUMBER $COMMENT_ID
 # consider only PRs (not issues)
 PRS=$(filter_PRs "$@")
 
-# set up the development branch plus the PR(s) to be tested
-if [ "$PRS" ]; then
+# if the testing release or branch are not specified, assumen them to be the same as the development ones
+[ "$TESTING_RELEASE" ] || TESTING_RELEASE=$DEVELOPMENT_RELEASE
+[ "$TESTING_BRANCH"  ] || TESTING_BRANCH=$DEVELOPMENT_BRANCH
+
+# if the testing release is different than the development release, set it up from scratch
+TESTING=false
+if [ "$TESTING_RELEASE" != "$DEVELOPMENT_RELEASE" ] || [ "$TESTING_BRANCH"  != "$DEVELOPMENT_BRANCH" ]; then
+  setup_development_release "testing" $TESTING_RELEASE $TESTING_BRANCH $REPOSITORY
+  TESTING=true
+# otherwise, start from a copy of the development release, but only if there are PRs to validate
+elif [ "$PRS" ]; then
   clone_release "development" "testing"
-  report "Testing PRs:"
+  TESTING=true
+fi
+
+# set up the PR(s) to be tested
+if [ "$PRS" ]; then
+  report "Testing branch [$REPOSITORY/$TESTING_BRANCH](https://github.com/$REPOSITORY/cmssw/tree/$TESTING_BRANCH) at $(< $BASE/testing/hash) with PRs:"
   for PR in $PRS; do
     echo $PR >> $BASE/testing/PRs
     git cms-merge-topic -u "$REPOSITORY:$PR"
@@ -84,7 +98,11 @@ if [ "$PRS" ]; then
   git cms-checkdeps -a
   # checkout all packages containing CUDA code, and rebuild all checked out packages with debug symbols
   USER_CXXFLAGS="-g" USER_CUDA_FLAGS="-g -lineinfo" cmsCudaRebuild.sh
+elif $TESTING; then
+  report "Testing branch [$REPOSITORY/$TESTING_BRANCH](https://github.com/$REPOSITORY/cmssw/tree/$TESTING_BRANCH) at $(< $BASE/testing/hash)"
+fi
 
+if $TESTING; then
   build_matrix "testing" "$WORKFLOWS"
   build_data_matrix "testing" "$DATA_WORKFLOWS"
   DIRECTORIES+=" testing"
