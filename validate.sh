@@ -473,7 +473,7 @@ function make_validation_plots() {
           --html-sample $DATASET \
           --html-validation-name $DATASET \
           --outputDir $LOCAL_DIR/$JOBID/$WORKDIR/$REFERENCE_WORKFLOW \
-          ${RELEASES[@]/%/-${REFERENCE_WORKFLOW}.root}
+          $(ls ${RELEASES[@]/%/-${REFERENCE_WORKFLOW}.root} 2> /dev/null)
         report "  - tracking validation [plots]($UPLOAD_URL/$JOBID/$WORKDIR/$WORKFLOW/index.html) and [summary]($UPLOAD_URL/$JOBID/$WORKDIR/$WORKFLOW/plots_summary.html) for workflow $WORKFLOW"
       elif has_pixel_validation $WORKFLOW; then
         # other workflows
@@ -488,9 +488,7 @@ function make_validation_plots() {
             --html-sample $DATASET \
             --html-validation-name $DATASET \
             --outputDir $LOCAL_DIR/$JOBID/$WORKDIR/$WORKFLOW \
-            ${REFERENCE_RELEASE}-${REFERENCE_WORKFLOW}.root \
-            ${TESTING_RELEASES[0]}-${REFERENCE_WORKFLOW}.root \
-            $FILES
+            $(ls ${REFERENCE_RELEASE}-${REFERENCE_WORKFLOW}.root ${TESTING_RELEASES[0]}-${REFERENCE_WORKFLOW}.root $FILES 2> /dev/null)
           report "  - tracking validation [plots]($UPLOAD_URL/$JOBID/$WORKDIR/$WORKFLOW/index.html) and [summary]($UPLOAD_URL/$JOBID/$WORKDIR/$WORKFLOW/plots_summary.html) for workflow $WORKFLOW"
         else
           report "  - :warning: tracking validation plots and summary for workflow $WORKFLOW are **missing**"
@@ -564,7 +562,7 @@ function make_gpucpu_plots() {
             --html-sample $DATASET \
             --html-validation-name $DATASET \
             --outputDir $LOCAL_DIR/$JOBID/$WORKDIR/$PULLDIR \
-            $FILES
+            $(ls $FILES 2> /dev/null)
           report "  - tracking validation [plots]($UPLOAD_URL/$JOBID/$WORKDIR/$PULLDIR/index.html) and [summary]($UPLOAD_URL/$JOBID/$WORKDIR/$PULLDIR/plots_summary.html) for workflows $GPU_WORKFLOW and $CPU_WORKFLOW"
         else
           report "  - :warning: tracking validation plots and summary for workflows $GPU_WORKFLOW and $CPU_WORKFLOW are **missing**"
