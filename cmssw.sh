@@ -6,15 +6,15 @@ export SCRAM_ARCH=slc7_amd64_gcc820
 source $VO_CMS_SW_DIR/cmsset_default.sh
 
 # Reference release
-REFERENCE_RELEASE=CMSSW_11_2_0_pre8
+REFERENCE_RELEASE=CMSSW_11_2_0_pre9
 
 # Development branch and latest release
 #DEVELOPMENT_BRANCH=master
-#DEVELOPMENT_RELEASE=CMSSW_11_2_0_pre8
+#DEVELOPMENT_RELEASE=CMSSW_11_2_0_pre9
 DEVELOPMENT_BRANCH=CMSSW_11_2_X_Patatrack
-DEVELOPMENT_RELEASE=CMSSW_11_2_0_pre8_Patatrack
+DEVELOPMENT_RELEASE=CMSSW_11_2_0_pre9_Patatrack
 TESTING_BRANCH=CMSSW_11_2_X_Patatrack
-TESTING_RELEASE=CMSSW_11_2_0_pre8_Patatrack
+TESTING_RELEASE=CMSSW_11_2_0_pre9_Patatrack
 
 # Number of threads and streams used in each job
 THREADS=8
