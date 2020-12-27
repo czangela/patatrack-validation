@@ -2,20 +2,20 @@
 #VO_CMS_SW_DIR from local.sh
 
 # CMSSW configuration
-export SCRAM_ARCH=slc7_amd64_gcc820
+export SCRAM_ARCH=slc7_amd64_gcc900
 source $VO_CMS_SW_DIR/cmsset_default.sh
 
 # Reference release
-REFERENCE_RELEASE=CMSSW_11_2_0_pre10
+REFERENCE_RELEASE=CMSSW_11_2_0
 
 # Development branch and latest release
-#DEVELOPMENT_RELEASE=CMSSW_11_2_0_pre10
+#DEVELOPMENT_RELEASE=CMSSW_11_2_0
 #DEVELOPMENT_BRANCH=master
-DEVELOPMENT_RELEASE=CMSSW_11_2_0_pre10_Patatrack
+DEVELOPMENT_RELEASE=CMSSW_11_2_0_Patatrack
 DEVELOPMENT_BRANCH=CMSSW_11_2_X_Patatrack
-#TESTING_RELEASE=CMSSW_11_2_0_pre10
+#TESTING_RELEASE=CMSSW_11_2_0
 #TESTING_BRANCH=master
-TESTING_RELEASE=CMSSW_11_2_0_pre10_Patatrack
+TESTING_RELEASE=CMSSW_11_2_0_Patatrack
 TESTING_BRANCH=CMSSW_11_2_X_Patatrack
 
 # Number of threads and streams used in each job
