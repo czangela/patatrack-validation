@@ -63,24 +63,23 @@ function build_matrix() {
     echo "# prepare to run on ${MY_NUMEVENTS:=$NUMEVENTS} events on $DATASET with ${MY_GLOBALTAG:=$GLOBALTAG} conditions"
     mkdir -p $CMSSW_BASE/run/$WORKDIR
     cd $CMSSW_BASE/run/$WORKDIR
+    local GROUP
     for WORKFLOW in $WORKFLOWS; do
       # check the the workflow actually exists in the release
-      runTheMatrix.py -n -e -l $WORKFLOW | grep -q ^$WORKFLOW || continue
+      GROUP=$(get_workflow_group $WORKFLOW)
+      runTheMatrix.py -n -e -w $GROUP -l $WORKFLOW | grep -q ^$WORKFLOW || continue
       mkdir -p $WORKFLOW
       cd $WORKFLOW
 
       # extract step3 and step4 commands
-      local STEP3="$(runTheMatrix.py -n -e -l $WORKFLOW | grep 'cmsDriver.py step3' | cut -d: -f2- | sed -e"s/^ *//" -e"s/ \+--conditions *[^ ]\+/ --conditions $MY_GLOBALTAG/" -e"s/ \+-n *[^ ]\+/ -n $MY_NUMEVENTS/") --fileout file:step3.root"
-      local STEP4="$(runTheMatrix.py -n -e -l $WORKFLOW | grep 'cmsDriver.py step4' | cut -d: -f2- | sed -e"s/^ *//" -e"s/ \+--conditions *[^ ]\+/ --conditions $MY_GLOBALTAG/" -e"s/ \+-n *[^ ]\+/ -n $MY_NUMEVENTS/") --filein file:step3_inDQM.root"
+      local STEP3="$(runTheMatrix.py -n -e -w $GROUP -l $WORKFLOW | grep 'cmsDriver.py step3' | cut -d: -f2- | sed -e"s/^ *//" -e"s/ \+--conditions *[^ ]\+/ --conditions $MY_GLOBALTAG/" -e"s/ \+-n *[^ ]\+/ -n $MY_NUMEVENTS/") --fileout file:step3.root"
+      local STEP4="$(runTheMatrix.py -n -e -w $GROUP -l $WORKFLOW | grep 'cmsDriver.py step4' | cut -d: -f2- | sed -e"s/^ *//" -e"s/ \+--conditions *[^ ]\+/ --conditions $MY_GLOBALTAG/" -e"s/ \+-n *[^ ]\+/ -n $MY_NUMEVENTS/") --filein file:step3_inDQM.root"
 
       echo "# prepare workflow $WORKFLOW"
       $STEP3 $INPUT --no_exec --python_filename=step3.py
       $STEP4        --no_exec --python_filename=step4.py
       # show CUDAService messages and configure multithreading
       cat >> step3.py << @EOF
-
-# Show CUDAService messages
-process.MessageLogger.categories.append("CUDAService")
 
 # Configure multithreading
 process.options.numberOfThreads = cms.untracked.uint32( $THREADS )
@@ -119,9 +118,6 @@ process.NVProfilerService = cms.Service("NVProfilerService",
     highlightModules = cms.untracked.vstring( moduleLabelsInSequences(process.reconstruction_step) ),
     showModulePrefetching = cms.untracked.bool( False )
 )
-
-# Show CUDAService messages
-process.MessageLogger.categories.append("CUDAService")
 
 # Configure multithreading
 process.options.numberOfThreads = cms.untracked.uint32( $THREADS )
@@ -214,9 +210,6 @@ import sys, os, inspect
 sys.path.append(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
 process.load("sourceFromRaw_cff")
 
-# Show CUDAService messages
-process.MessageLogger.categories.append("CUDAService")
-
 # Configure multithreading
 process.options.numberOfThreads = cms.untracked.uint32( $THREADS )
 process.options.numberOfStreams = cms.untracked.uint32( $STREAMS )
@@ -246,9 +239,6 @@ process.NVProfilerService = cms.Service("NVProfilerService",
     highlightModules = cms.untracked.vstring( moduleLabelsInSequences(process.reconstruction_step) ),
     showModulePrefetching = cms.untracked.bool( False )
 )
-
-# Show CUDAService messages
-process.MessageLogger.categories.append("CUDAService")
 
 # Configure multithreading
 process.options.numberOfThreads = cms.untracked.uint32( $THREADS )
