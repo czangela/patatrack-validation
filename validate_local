@@ -1,0 +1,118 @@
+#! /bin/bash -e
+
+# Script for testing one or more pull requests against a reference release and an intermediate development release
+#
+# Usage:
+#   validate [PR ...]
+#
+# Note: this script relies on `visDQMUpload` and `visDQMUtils.py` being available in the same directory.
+# If they are missing they are automatically downloaded from https://github.com/rovere/dqmgui/ .
+
+VALIDATEREPO=""
+if [[ -z $CMSSW_BASE ]]
+then
+  echo "CMSSW_BASE is unset. Set up your CMSSW environment.\n Exiting."
+  return
+else
+  VALIDATEREPO=$CMSSW_BASE
+fi
+# Local configuration - should go before the others
+source local.sh
+
+# CMSSW configuration
+source cmssw.sh
+
+# DQM configuration
+source dqm.sh
+
+# GitHub-related configuration
+source github.sh
+
+# Input samples configuration
+source input.sh
+
+# Validation scripts
+source validate.sh
+
+# Hash of this script and its configuration
+SCRIPTHASH=$(cat $VALIDATION/*.sh ${BASH_SOURCE[0]} | sha1sum | cut -d' ' -f1)
+
+# Create a temporay working directory
+function join_args() { local IFS=_; echo "$*"; }
+BASE=$(mktemp -d -p $PWD $(join_args run "$@").XXXXXXXXXX)
+[ -d $BASE ] || exit 1
+REPORT=$BASE/report.md
+
+
+# save the original file descriptors, then redirect all output and errors to a log file
+exec 3>&1 4>&2
+exec &> $BASE/log
+
+# main
+echo > $REPORT
+
+# upload the report to the last PR given on the command line
+for ISSUE_NUMBER in "$@"; do true; done
+
+# if we can edit the comment after posting it, create an empty comment as a starting point
+COMMENT_ID=$(can_post_comment $ISSUE_NUMBER && $EDIT_COMMENT && upload_report $ISSUE_NUMBER) || true
+
+# set up the reference release
+report "## Validation summary"
+
+setup_release "reference" $REFERENCE_RELEASE
+report "Reference release [$REFERENCE_RELEASE](https://github.com/cms-sw/cmssw/tree/$REFERENCE_RELEASE) at $(< $BASE/reference/hash)"
+build_matrix "reference" "$REFERENCE_WORKFLOW"
+DIRECTORIES="reference"
+upload_report $ISSUE_NUMBER $COMMENT_ID
+
+
+if [[ $DEVELOPMENT_RELEASE && $DEVELOPMENT_BRANCH ]]
+then
+  # set up the current development branch
+  setup_development_release "development" $DEVELOPMENT_RELEASE $DEVELOPMENT_BRANCH $REPOSITORY
+  report "Development branch [$REPOSITORY/$DEVELOPMENT_BRANCH](https://github.com/$REPOSITORY/cmssw/tree/$DEVELOPMENT_BRANCH) at $(< $BASE/development/hash)"
+  build_matrix "development" "$WORKFLOWS"
+  build_data_matrix "development" "$DATA_WORKFLOWS"
+  DIRECTORIES+=" development"
+  upload_report $ISSUE_NUMBER $COMMENT_ID
+fi
+
+report "Testing local release ${VALIDATEREPO} at $(< $BASE/testing/hash)"
+report
+
+# cloning the local release to testing to have a fresh release
+set_duplicate_release $VALIDATEREPO "testing"
+cd $BASE/testing/src/
+eval $(scram runtime -sh)
+build_matrix "testing" "$WORKFLOWS"
+build_data_matrix "testing" "$DATA_WORKFLOWS"
+DIRECTORIES+=" testing"
+
+# compute a unique hash for this validation run
+JOBID=$({ echo $SCRIPTHASH; cat $(apply_and_glob "$BASE/%/hash" $DIRECTORIES); } | sha1sum | cut -d' ' -f1)
+echo $JOBID > $BASE/jobid
+
+# download the benchmark scripts
+git clone https://github.com/cms-patatrack/patatrack-scripts.git $BASE/patatrack-scripts
+# change the color palette used to plot the throughpit scans to match the "development" and "testing" releases
+sed -e'/kRed\|kBlue/d' -i $BASE/patatrack-scripts/plot_scan.py
+
+# run the workflows
+run_workflows_in_parallel $DIRECTORIES
+# make validation plots
+make_validation_plots $DIRECTORIES
+# make GpuVsCpu plots
+make_gpucpu_plots $DIRECTORIES
+# make throughput plots
+make_throughput_plots $DIRECTORIES
+# upload DQM plots to the GUI
+#upload_dqm_plots $DIRECTORIES
+#upload_report $ISSUE_NUMBER $COMMENT_ID
+# upload nvprof profiles
+
+# restore the original descriptors, close and upload the log files
+exec 1>&3- 2>&4-
+
+# mark the validation as complete
+

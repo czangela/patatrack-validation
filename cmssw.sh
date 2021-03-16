@@ -156,6 +156,20 @@ function clone_release() {
   echo
 }
 
+function set_duplicate_release() {
+  local SOURCE="$1"
+  local TARGET="$2"
+  clone_release $1 $2
+
+  cd $BASE/$TARGET/src
+  cmsCudaSetup.sh
+
+  git cms-checkdeps -a
+
+  USER_CXXFLAGS="-g" USER_CUDA_FLAGS="-g -lineinfo" cmsCudaRebuild.sh
+
+}
+
 function get_workflow_group() {
   local WORKFLOW="$1"
   if echo "$GPU_WORKFLOWS" | grep -q -w "$WORKFLOW"; then
