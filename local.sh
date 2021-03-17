@@ -19,6 +19,6 @@ L1ACCEPT_CACHE_PATH="file:$LOCAL_CACHE_PATH/store/data/Run2018D/EphemeralHLTPhys
 L1ACCEPT_CACHE_FILE="A27DFA33-8FCB-BE42-A2D2-1A396EEE2B6E.root"
 
 # URL and local area for uploading validation plots, profiles and logs
-UPLOAD_URL="https://cern.ch/aczirkos/validation/pulls"
+UPLOAD_URL="https://aczirkos.web.cern.ch/aczirkos/validation/pulls"
 UPLOAD_DIR="/eos/user/a/aczirkos/www/validation/pulls"
 LOCAL_DIR="/data/user/$USER/patatrack-validation/pulls"
