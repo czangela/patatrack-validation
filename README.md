@@ -62,7 +62,7 @@ Note, that some services e.g. **eos** and **afs** might not be accessible from y
 
 In case you don't yet have a website, you can follow the guide on how to [Create web content folder for personal website](https://cernbox-manual.web.cern.ch/cernbox-manual/en/web/personal_website_content.html#create-personal-website-via-web-services "Create web content folder for personal website").
 
-### Configure branch settings in `cmssw.sh`
+### Configure release and branch settings in `cmssw.sh`
 
 You might need to set the **reference release** and **development release** as well as **branches** in the `cmssw.sh` file, if they differ from the default settings (which might be outdated). 
 
@@ -111,5 +111,8 @@ For every **run** a new folder (in the format `run_<num>.XXXXXXXXXX`) is created
 The script `validate_local` for local validations is available on a separate branch called `local_val`.
 
 ## More information
+For more information about the validation, see [the wiki page on patatrack.web.cern.ch](https://patatrack.web.cern.ch/patatrack/wiki/PatatrackValidation/). (might be outdated)
+
 For more information on Patatrack, see https://patatrack.web.cern.ch/patatrack/ .  
+
 For more insormation on CMSSW, see https://cms-sw.github.io/ .
